@@ -25,140 +25,84 @@ def cal(board_size, row_rules, col_rules):
 def solve_chessboard(n, row_rules, col_rules):
     # 初始化棋盘
     board = [[0] * n for _ in range(n)]
-    board_row_dict = {}  # 创建字典实现记忆化搜索
     solution = []
 
-    # 初始化某行
-    def init_board_row(total_ones):
-        if total_ones in board_row_dict:
-            return board_row_dict[total_ones]
-        elif total_ones == 0:
-            # 只有1种情况，全为0
-            board_row_dict[0] = [[0] * n]
-            return board_row_dict[0]
-        else:
-
-            def dfs(col, remaining_ones, current_row):
-                if col == n:
-                    if remaining_ones == 0:
-                        yield current_row.copy()
-                    return
-                if remaining_ones > 0:
-                    # 在当前列放1
-                    current_row[col] = 1
-                    yield from dfs(col + 1, remaining_ones - 1, current_row)
-                    # 回溯，置零
-                    current_row[col] = 0
-                # 在当前列放0
-                yield from dfs(col + 1, remaining_ones, current_row)
-
-            # 初始化
-            board_row = [0] * n
-            # 使用dfs搜索，并记忆
-            board_row_dict[total_ones] = list(dfs(0, total_ones, board_row))
-            return board_row_dict[total_ones]
-
     # 检查放置是否满足行规则
-    def is_valid_row_pattern(board_row, pattern):
-        groups = []
+    def is_valid_row(board_row, row_rule, col):
+        # 处理规则为0的情况
+        if row_rule == [0]:
+            if sum(board_row) == 0:
+                return True
+            else:
+                return False
+
+        remain_cell = n - (col + 1)  # 剩余格子数
+        remain_piece = sum(row_rule) - sum(board_row)  # 剩余棋子数
+        space = len(row_rule) - 1  # 至少空格数
+
+        # 特殊处理全为0的情况
+        if sum(board_row) == 0:
+            # 剩余格子数 < 棋子数 + 至少空格数
+            if remain_cell < remain_piece + space:
+                return False
+            else:
+                return True
+
         i = 0
-        while i < len(board_row):
+        index = 0  # 棋子组编号
+        while i <= col:
             if board_row[i] == 1:
-                count = 0
-                while i < len(board_row) and board_row[i] == 1:
+                index += 1
+                count = 0  # 棋子组的棋子数
+                while i <= col and board_row[i] == 1:
                     count += 1
                     i += 1
-                groups.append(count)
+
+                # 检查是否合法
+                if index > len(row_rule):  # 棋子组数超过规则
+                    return False
+                if i == col + 1:  # 最后一个组
+                    # 棋子数不超过即可
+                    if count > row_rule[index - 1]:
+                        return False
+                else:
+                    # 严格相等
+                    if count != row_rule[index - 1]:
+                        return False
             else:
                 i += 1
-        # 如果列表为空
-        if not groups:
-            groups = [0]
-        # 首先比较两个列表的长度是否相等
-        if len(groups) != len(pattern):
-            return False
 
-        # 然后逐个比较列表中的数字
-        for group_size, pattern_size in zip(groups, pattern):
-            if group_size != pattern_size:
-                return False
+        # 剩余的格子不够用：剩余格子数 < 剩余棋子数 + 至少的空格数
+        space -= index
+        if board_row[col] == 1:
+            space += 1
+        if remain_cell < remain_piece + space:
+            return False
 
         # 如果所有比较都通过，则返回True
         return True
 
     # 检查放置是否满足列规则
-    def is_valid_col(current_row):
-        for col in range(n):
-            groups = []
-            row = 0
-            while row <= current_row:
-                if board[row][col] == 1:
-                    count = 0
-                    while row <= current_row and board[row][col] == 1:
-                        count += 1
-                        row += 1
-                    groups.append(count)
-                else:
-                    row += 1
-
-            # 保证剩下的行数够放棋子
-            if n - (current_row + 1) < sum(col_rules[col]) - sum(groups):
-                return False
-
-            # 处理groups长度为0的特殊情况
-            if len(groups) == 0:
-                continue
-
-            # 处理最后一行
-            if current_row == n - 1:
-                # 首先比较两个列表的长度
-                if len(groups) != len(col_rules[col]):
-                    return False
-                # 然后逐个比较
-                for i in range(len(groups)):
-                    if groups[i] != col_rules[col][i]:
-                        return False
-
-            # 不是最后一行
-            else:
-                # 首先比较两个列表的长度
-                if len(groups) > len(col_rules[col]):
-                    return False
-                # 逐个比较，最后一个数字除外
-                for i in range(len(groups) - 1):
-                    if groups[i] != col_rules[col][i]:
-                        return False
-                # 最后一个数字
-                last_index = len(groups) - 1
-                # 如果当前行棋子刚刚放，最后一个棋子组应小于等于rules
-                if board[current_row][col] == 1:
-                    if groups[last_index] > col_rules[col][last_index]:
-                        return False
-                # 否则，应当严格等于
-                else:
-                    if groups[last_index] != col_rules[col][last_index]:
-                        return False
-        # 如果所有比较都通过，则返回True
-        return True
+    def is_valid_col(board_col, col_rule, row):
+        return is_valid_row(board_col, col_rule, row)
 
     # 深度优先搜索
-    def dfs(row=0):
+    def dfs(row=0, col=0):
         if row == n:
             solution.append(copy.deepcopy(board))
             return  # 找到一个解
-        board_row = init_board_row(sum(row_rules[row]))
-        for index, situation in enumerate(board_row):
-            if row == 0:
-                print_progress_bar(index / len(board_row))
-            if is_valid_row_pattern(situation, row_rules[row]):
-                # 尝试放置棋子
-                board[row] = situation
-                # 如果当前行满足列要求
-                if is_valid_col(row):
-                    # 递归到下一行
-                    dfs(row + 1)
-                    # 回溯，也可以不清零
-                    board[row] = [0] * n
+
+        board[row][col] = 1
+        if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
+            [row[col] for row in board], col_rules[col], row
+        ):
+            dfs(row + (col + 1) // n, (col + 1) % n)
+
+        board[row][col] = 0
+        if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
+            [row[col] for row in board], col_rules[col], row
+        ):
+            dfs(row + (col + 1) // n, (col + 1) % n)
 
     dfs()
     return solution
