@@ -9,11 +9,16 @@ from result import result_show
 def main():
     while True:
         # 输入和初始化
-        board_size, row_rules, col_rules = input_init()
-        # 计算
-        solution = cal(board_size, row_rules, col_rules)
-        # 显示答案
-        result_show(solution)
+        board_size, row_rules, col_rules, input_ok = input_init()
+
+        if input_ok:
+            # 计算
+            solution = cal(board_size, row_rules, col_rules)
+            # 显示答案
+            result_show(solution)
+        else:
+            print("\033[91m" + "INPUT ERROR!" + "\033[0m")
+            input("press Enter to continue...")
 
 
 if __name__ == "__main__":

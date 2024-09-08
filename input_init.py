@@ -27,5 +27,12 @@ def input_init():
         col_rules.append(list(map(int, input().split())))
     print()  # 打印一个空行分割
 
+    # 检查输入是否正确
+    ok = True
+    sum_row = sum(sum(row) for row in row_rules)
+    sum_col = sum(sum(col) for col in col_rules)
+    if sum_row != sum_col:
+        ok = False
+
     # 返回棋盘的大小，规则
-    return n, row_rules, col_rules
+    return n, row_rules, col_rules, ok
