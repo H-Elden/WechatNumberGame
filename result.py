@@ -40,12 +40,10 @@ def plot_chessboard(s, figsize=(8, 8)):
 def result_show(solution):
     # 打印解决方案
     if solution:
-        for index, sol in enumerate(solution, start=1):
-            print(f"solution {index}:")  # 打印编号
-            for row in sol:
-                print(" ".join(str(cell) for cell in row))
-            print()  # 打印空行来分隔不同的solution
-            plot_chessboard(sol, figsize=(6, 6))
+        print("solution:")  # 打印编号
+        for row in solution:
+            print(" ".join(str(cell) for cell in row))
+        plot_chessboard(solution, figsize=(6, 6))
     else:
         print("\033[91m" + "No solution found." + "\033[0m")
         input("press Enter to continue...")

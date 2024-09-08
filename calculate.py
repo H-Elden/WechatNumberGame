@@ -2,7 +2,6 @@
 # 计算答案的函数
 
 import time
-import copy
 
 
 from progressbar import print_progress_bar
@@ -27,7 +26,6 @@ def cal(board_size, row_rules, col_rules):
 def solve_chessboard(n, row_rules, col_rules):
     # 初始化棋盘
     board = [[0] * n for _ in range(n)]
-    solution = []
 
     # 检查放置是否满足行列规则
     def is_valid(board_row, row_rule, col):
@@ -87,8 +85,7 @@ def solve_chessboard(n, row_rules, col_rules):
     # 深度优先搜索
     def dfs(row=0, col=0):
         if row == n:
-            solution.append(copy.deepcopy(board))
-            return  # 找到一个解
+            return True  # 找到一个解
 
         for i in range(2):
             board[row][col] = i
@@ -96,11 +93,15 @@ def solve_chessboard(n, row_rules, col_rules):
             if is_valid(board[row], row_rules[row], col) and is_valid(
                 [row[col] for row in board], col_rules[col], row
             ):
-                dfs(row + (col + 1) // n, (col + 1) % n)
+                if dfs(row + (col + 1) // n, (col + 1) % n):
+                    return True
 
         # 打印进度条
         if row * n + col < 14:
             print_bar(board)
+        return False
 
-    dfs()
-    return solution
+    if dfs():
+        return board
+    else:
+        return None
