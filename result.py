@@ -18,14 +18,24 @@ def plot_chessboard(s, figsize=(8, 8)):
             color = "palegoldenrod" if s[i][j] == 0 else "green"
 
             # 绘制矩形
-            rect = plt.Rectangle((j, i), 1, 1, facecolor=color, edgecolor="black")
+            rect = plt.Rectangle((j, i), 1, 1, facecolor=color, edgecolor="white")
             ax.add_patch(rect)
 
-    # 设置坐标轴不可见
-    ax.set_xticks(np.arange(0, n + 1, 1), minor=True)
-    ax.set_yticks(np.arange(0, n + 1, 1), minor=True)
+    # 设置xy轴主要刻度线的位置
+    ax.set_xticks(np.arange(0.5, n + 1, 1))
+    ax.set_yticks(np.arange(0.5, n + 1, 1))
+    # 设置xy轴次要刻度线的位置
+    step = 1
+    if n >= 8:
+        if n % 4 == 0:
+            step = 4
+        elif n % 5 == 0:
+            step = 5
+    ax.set_xticks(np.arange(0, n + 1, step), minor=True)
+    ax.set_yticks(np.arange(0, n + 1, step), minor=True)
     ax.grid(which="minor", color="black", linestyle="-", linewidth=2)
 
+    # 设置坐标轴不可见
     ax.set_xticklabels([])
     ax.set_yticklabels([])
 
