@@ -29,8 +29,8 @@ def solve_chessboard(n, row_rules, col_rules):
     board = [[0] * n for _ in range(n)]
     solution = []
 
-    # 检查放置是否满足行规则
-    def is_valid_row(board_row, row_rule, col):
+    # 检查放置是否满足行列规则
+    def is_valid(board_row, row_rule, col):
         # 处理规则为0的情况
         if row_rule == [0]:
             if sum(board_row) == 0:
@@ -84,10 +84,6 @@ def solve_chessboard(n, row_rules, col_rules):
         # 如果所有比较都通过，则返回True
         return True
 
-    # 检查放置是否满足列规则
-    def is_valid_col(board_col, col_rule, row):
-        return is_valid_row(board_col, col_rule, row)
-
     # 深度优先搜索
     def dfs(row=0, col=0):
         if row == n:
@@ -96,7 +92,8 @@ def solve_chessboard(n, row_rules, col_rules):
 
         for i in range(2):
             board[row][col] = i
-            if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
+            # 判断行列是否均符合规则
+            if is_valid(board[row], row_rules[row], col) and is_valid(
                 [row[col] for row in board], col_rules[col], row
             ):
                 dfs(row + (col + 1) // n, (col + 1) % n)
