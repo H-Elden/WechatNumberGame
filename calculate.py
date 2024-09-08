@@ -6,10 +6,12 @@ import copy
 
 
 from progressbar import print_progress_bar
+from progressbar import print_bar
 
 
 def cal(board_size, row_rules, col_rules):
     print("Calculating...")
+    print_progress_bar(0)
     # 记录开始计算时的时间
     start_time = time.time()
     # 解决棋盘问题
@@ -92,17 +94,16 @@ def solve_chessboard(n, row_rules, col_rules):
             solution.append(copy.deepcopy(board))
             return  # 找到一个解
 
-        board[row][col] = 1
-        if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
-            [row[col] for row in board], col_rules[col], row
-        ):
-            dfs(row + (col + 1) // n, (col + 1) % n)
+        for i in range(2):
+            board[row][col] = i
+            if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
+                [row[col] for row in board], col_rules[col], row
+            ):
+                dfs(row + (col + 1) // n, (col + 1) % n)
 
-        board[row][col] = 0
-        if is_valid_row(board[row], row_rules[row], col) and is_valid_col(
-            [row[col] for row in board], col_rules[col], row
-        ):
-            dfs(row + (col + 1) // n, (col + 1) % n)
+        # 打印进度条
+        if row * n + col < 14:
+            print_bar(board)
 
     dfs()
     return solution

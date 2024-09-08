@@ -4,6 +4,38 @@
 import sys
 
 
+def print_bar(board_list):
+    """
+    计算进度百分比，并打印进度条。
+    @参数:
+        board_list - 棋盘
+    """
+    # 初始化一个空字符串，用于存储二进制位
+    binary_string = ""
+
+    # 计数器，用于跟踪已处理的数字数量
+    count = 0
+
+    # 遍历二维列表
+    for row in board_list:
+        for num in row:
+            # 当处理的数字少于14个时，继续添加二进制位
+            if count < 14:
+                binary_string += str(num)
+                count += 1
+            else:
+                # 如果已经处理了14个数字，则停止循环
+                break
+    # 将二进制字符串转换为整数
+    binary_integer = int(binary_string, 2)
+
+    percentage = binary_integer / ((1 << 14) - 1)
+    # 由于只取了高14二进制位，所以percentage == 1.0时不一定进度100%
+    if percentage == 1.0:
+        percentage = 0.9999
+    print_progress_bar(percentage)
+
+
 def print_progress_bar(progress):
     """
     Call in a loop to create terminal progress bar with color.
